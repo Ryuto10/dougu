@@ -9,5 +9,5 @@ setup(
     author_email='ryuto@ecei.tohoku.ac.jp',
     license='MIT',
     packages=['dougu'],
-    zip_safe=False
+    zip_safe=False, install_requires=['torchtext']
 )

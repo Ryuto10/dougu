@@ -2,6 +2,7 @@ import json
 import subprocess
 import sys
 from argparse import Namespace
+from datetime import datetime
 from os import path, getcwd
 
 
@@ -16,7 +17,7 @@ def write_log(logfile_path: str = None,
 
     print("# Basic Information", file=fo)
     print("## Time", file=fo)
-    print("\t", get_time(), file=fo)
+    print("\t", datetime.today().strftime("%Y/%m/%d %H:%M:%S"), file=fo)
     print("## Input Command", file=fo)
     print("\t", " ".join(sys.argv), file=fo)
     print("## The directory of the running script.", file=fo)
