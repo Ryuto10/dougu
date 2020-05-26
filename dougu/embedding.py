@@ -2,7 +2,7 @@ import numpy as np
 from logzero import logger
 from sklearn.metrics.pairwise import cosine_similarity
 
-from read import read_file
+from .read import read_file
 
 
 class WordVecSimilar:
