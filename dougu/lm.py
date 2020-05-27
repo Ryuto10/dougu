@@ -15,16 +15,32 @@ class BertMlmInteractive:
         how_pickup: choose from ['argmax', 'sample'].
             - 'argmax': Select the most probable token
             - 'sample': Select the token by sampling
+
         what_order: choose from ['beam', 'multi', 'single']
             - 'beam': Search for tokens with beam search
             - 'multi': Fill the MASK with tokens at the same time
             - 'single': Recursively fill MASK from the front with tokens
+
     Setting:
         self.how_pickup: str
         self.whar_order: str
         self.beam_k: int
         self.black_list: [str, ...]
+
+    Example of usage:
+        ```
+        >>> model = BertMlmInteractive(what_order="beam")
+        >>> text = "彼の出身地はMだ。"
+        >>> topk_sent = model(text)
+        >>> topk_sent
+        [['[CLS]', '彼', 'の', '出身', '地', 'は', '不明', 'だ', '。', '[SEP]'],
+        ['[CLS]', '彼', 'の', '出身', '地', 'は', 'アメリカ合衆国', 'だ', '。', '[SEP]'],
+        ['[CLS]', '彼', 'の', '出身', '地', 'は', 'ロシア', 'だ', '。', '[SEP]'],
+        ['[CLS]', '彼', 'の', '出身', '地', 'は', 'メキシコ', 'だ', '。', '[SEP]'],
+        ['[CLS]', '彼', 'の', '出身', '地', 'は', 'スイス', 'だ', '。', '[SEP]']]
+        ```
     """
+
     def __init__(self, how_pickup: str = "argmax", what_order: str = "beam"):
         # setting
         self.how_pickup: str = how_pickup
@@ -42,7 +58,11 @@ class BertMlmInteractive:
         self.model.to(self._device)
         self.model.eval()
 
-    def __call__(self, text):
+    def __call__(self, text: str):
+        """
+        Args:
+            text: target sentence (the mask token is represented by 'M')
+        """
         input_ids = self._convert_text_to_ids(text)
         masked_ids = torch.where(input_ids == self.tokenizer.mask_token_id)[1].tolist()
         if not masked_ids:
@@ -53,7 +73,9 @@ class BertMlmInteractive:
         with torch.no_grad():
             if self.what_order == "beam":
                 predict_topk_sents, predict_topk_tokens = self._prediction_with_beam_search(input_ids, masked_ids)
+
                 return predict_topk_sents
+
             elif self.what_order == "multi":
                 predict_tokens = self._prediction_multi(input_ids, masked_ids)
             elif self.what_order == "single":

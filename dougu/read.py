@@ -1,7 +1,6 @@
 import gzip
 
 import json
-from logzero import logger
 
 
 def read_file(file_path: str):
@@ -31,4 +30,3 @@ def count_file_length(file: str) -> int:
     for idx, _ in enumerate(read_file(file), 1):
         pass
     return idx
-
