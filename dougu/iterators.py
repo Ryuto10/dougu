@@ -5,7 +5,7 @@ from typing import Generator, Iterable
 import torchtext
 
 
-def batch_gen(iterable: Iterable, batchsize: int) -> Generator:
+def batch_gen(iterable: Iterable, batchsize: int) -> Generator[Iterable, None, None]:
     """Create mini-batch
 
     Args:

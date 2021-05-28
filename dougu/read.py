@@ -3,7 +3,7 @@ import json
 from typing import Generator
 
 
-def read_line(file_path: str) -> Generator[str]:
+def read_line(file_path: str) -> Generator[str, None, None]:
     """ファイルの行を読み込みます。gzipで圧縮したファイルも読み込みます。
 
     Args:
@@ -35,7 +35,7 @@ def is_gzip(file_path: str) -> bool:
         return False
 
 
-def read_jsonl(file_path: str) -> Generator[str]:
+def read_jsonl(file_path: str) -> Generator[str, None, None]:
     """jsonl形式のファイルを読み込みます。gzipで圧縮したファイルも読み込みます。
 
     Args:
