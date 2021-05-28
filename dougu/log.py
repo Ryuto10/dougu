@@ -3,13 +3,23 @@ import subprocess
 import sys
 from argparse import Namespace
 from datetime import datetime
-from os import path, getcwd
+from os import getcwd, path
 
 
-def write_log(logfile_path: str = None,
-              args_file_path: str = None,
-              args: Namespace = None,
-              comment: str = None):
+def write_log(
+    logfile_path: str = None,
+    args_file_path: str = None,
+    args: Namespace = None,
+    comment: str = None
+):
+    """Write log file
+
+    Args:
+        logfile_path (str, optional): Path to output file for log. (Defaults to None)
+        args_file_path (str, optional): Path to output file for args. (Defaults to None)
+        args (Namespace, optional): argparse.ArgumentParser().parse_args(). (Defaults to None)
+        comment (str, optional): custom comments. (Defaults to None)
+    """
     write_type = "a" if logfile_path and path.exists(logfile_path) else "w"
     fo = open(logfile_path, write_type) if logfile_path else None
     if write_type == "a":
@@ -33,8 +43,10 @@ def write_log(logfile_path: str = None,
     print("\t{}".format(pip_list.replace("\n", "\n\t")), file=fo)
 
     if path.exists('.git'):
-        git_log = subprocess.check_output("git log --pretty=fuller | head -7", shell=True).decode('utf-8')
-        git_diff = subprocess.check_output("git diff HEAD " + sys.argv[0], shell=True).decode('utf-8')
+        git_log = subprocess.check_output(
+            "git log --pretty=fuller | head -7", shell=True).decode('utf-8')
+        git_diff = subprocess.check_output(
+            "git diff HEAD " + sys.argv[0], shell=True).decode('utf-8')
         print("\n# Git", file=fo)
         print("## log", file=fo)
         print("> {}  ".format(git_log.replace("\n", "  \n> ")), file=fo)

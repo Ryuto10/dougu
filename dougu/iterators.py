@@ -1,6 +1,28 @@
+from itertools import chain, islice
 from math import ceil
+from typing import Generator, Iterable
 
 import torchtext
+
+
+def batch_gen(iterable: Iterable, batchsize: int) -> Generator:
+    """Create mini-batch
+
+    Args:
+        iterable (Iterable): the target iterable object
+        batchsize (int): Mini-batch size
+
+    Yields:
+        Generator: mini-batch
+    """
+    iterable = iter(iterable)
+
+    while True:
+        batch = islice(iterable, batchsize)
+        try:
+            yield chain([next(batch)], batch)
+        except StopIteration:
+            break
 
 
 class PaddingBucketIterator(object):
