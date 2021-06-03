@@ -66,7 +66,7 @@ class MecabTokenizer:
 
         self.wakati = wakati
         self.mecab_option = mecab_option
-        self.mecab_tagger = MeCab.Tagger(ipadic.MECAB_ARGS + " -Owakati")
+        self.mecab_tagger = MeCab.Tagger(self.mecab_option)
 
     def __call__(self, text: str) -> str:
         text = normalize(text.rstrip("\n"))
