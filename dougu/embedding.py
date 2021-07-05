@@ -1,8 +1,10 @@
-from typing import List, Tuple
+from dataclasses import dataclass
+from typing import Dict, List, Tuple
 
 import numpy as np
 from logzero import logger
 from sklearn.metrics.pairwise import cosine_similarity
+from sklearn.preprocessing import normalize
 
 from .read import read_line
 
@@ -100,3 +102,92 @@ class WordEmbedding:
         known_words = [word for word in words if word in self.word2index]
 
         return known_words
+
+
+@dataclass
+class SIF:
+    """
+    Args:
+        embeddings: Word embeddings
+        word2index: Dictionary to convert from a word to an index
+        word_freq_file: Path to word frequency file.
+                        Each line contains a word and its frequency separated by tab.
+                        This file is assumed to be sorted in descending order by frequency.
+        normalize_by_word: If true, each word is normalized with L2 norm.
+        normalize_by_sent: If true, each sentence is normalized with L2 norm.
+    """
+    embeddings: np.ndarray
+    word2index: Dict[str, int]
+    word_freq_file: str = None
+    normalize_by_word: bool = False
+    normalize_by_sent: bool = True
+
+    def __post_init__(self):
+        self.a = 1e-3
+        self.use_sif = True
+        self.n_vocab, self.dim = self.embeddings.shape
+        self.zero_vector = np.zeros(self.dim)
+        self.word_prob = self.create_wordprob_from_wordfreq(
+            file_path=self.word_freq_file,
+        )
+
+        logger.info(f"Number of vocab: {self.n_vocab}, dim = {self.dim}")
+
+        if self.normalize_by_word:
+            self.embeddings = normalize(self.embeddings, norm='l2')
+            logger.info("Each word is normalized with L2 norm.")
+
+    def __call__(self, tokens: List[str]) -> np.ndarray:
+        """Create sentence vector"""
+        known_tokens = [token for token in tokens if token in self.token2idx]
+
+        # If there are only unknown words
+        if len(known_tokens) == 0:
+            logger.warning("Length of words is zero")
+            logger.warning(" ".join(tokens))
+            return self.zero_vector
+
+        # create vector
+        ids = [self.token2idx[token] for token in known_tokens]
+        embeds = self.embeddings[ids]
+        if self.use_sif:
+            word_weights = np.array([self.get_sif_weight(token) for token in known_tokens])
+            sent_vec = np.dot(word_weights, embeds)
+        else:
+            sent_vec = np.sum(embeds, axis=0)
+
+        # normalize
+        if self.normalize_by_sent:
+            sent_vec = normalize(sent_vec.reshape(1, -1), norm='l2').reshape(-1)
+
+        return sent_vec
+
+    def get_sif_weight(self, word: str) -> float:
+        w_prob = self.word_prob[word] if word in self.word_freq else 0
+        weight = self.a / (self.a + w_prob)
+
+        return weight
+
+    @staticmethod
+    def create_wordprob_from_wordfreq(file_path: str, min_freq: int = None) -> Dict[str, int]:
+        """
+        Args:
+            file_path: Path to word frequency file (each line contains a word and its frequency).
+            min_freq: If this value is set, words with a frequency lower than this number will not be used.
+        Return:
+            word_prob: Dictionary for word probability
+        """
+        logger.info(f"Loading: {file_path}")
+
+        word_freq = {}
+        for line in read_line(file_path):
+            token, freq = line.split("\t")
+            if min_freq is not None and int(freq) < min_freq:
+                break
+            word_freq[token] = int(freq)
+        logger.info("done")
+
+        all_freq = sum(freq for freq in word_freq.values())
+        word_prob = {token: freq / all_freq for token, freq in word_freq.items()}
+
+        return word_prob
