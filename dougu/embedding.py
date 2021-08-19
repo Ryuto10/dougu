@@ -11,6 +11,7 @@ from .read import read_line
 
 class WordEmbedding:
     """Measuring the similarity of word embeddings"""
+
     def __init__(self, model_path: str):
         self.model_path = model_path
         self.n_vocab = None
@@ -26,6 +27,7 @@ class WordEmbedding:
         self.embeds = []
 
         # read file
+        is_word2vec_format = None
         for idx, line in enumerate(read_line(self.model_path), -1):
             if idx == -1:
                 # model fileの先頭に"vocab size", "embed dim"が書いてある場合の分岐
@@ -85,13 +87,13 @@ class WordEmbedding:
     def compute_similar_words_with_vec(self, vec: np.ndarray, top_n: int = 10) -> List[Tuple[str, float]]:
         """
         Args:
-            word (str): The target vector
+            vec: The target vector
             top_n (int): Top N
 
         Return:
             best_n: [(word, score), ...], (Length of list = top_n)
         """
-        assert vec.shape == (self.dim, ), f"The dimensions of the vectors don't match ({vec.shape} != {self.dim})."
+        assert vec.shape == (self.dim,), f"The dimensions of the vectors don't match ({vec.shape} != {self.dim})."
         scores = cosine_similarity(vec.reshape(1, -1), self.embeds)[0]
         index2word = {idx: word for word, idx in self.word2index.items()}
         best_n = [(index2word[index], scores[index]) for index in np.argsort(-scores)[1:top_n + 1]]
@@ -108,13 +110,13 @@ class WordEmbedding:
 class SIF:
     """
     Args:
-        embeddings: Word embeddings
-        word2index: Dictionary to convert from a word to an index
-        word_freq_file: Path to word frequency file.
+        - embeddings: Word embeddings
+        - word2index: Dictionary to convert from a word to an index
+        - word_freq_file: Path to word frequency file.
                         Each line contains a word and its frequency separated by tab.
                         This file is assumed to be sorted in descending order by frequency.
-        normalize_by_word: If true, each word is normalized with L2 norm.
-        normalize_by_sent: If true, each sentence is normalized with L2 norm.
+        - normalize_by_word: If true, each word is normalized with L2 norm.
+        - normalize_by_sent: If true, each sentence is normalized with L2 norm.
     """
     embeddings: np.ndarray
     word2index: Dict[str, int]
@@ -139,7 +141,7 @@ class SIF:
 
     def __call__(self, tokens: List[str]) -> np.ndarray:
         """Create sentence vector"""
-        known_tokens = [token for token in tokens if token in self.token2idx]
+        known_tokens = [token for token in tokens if token in self.word2index]
 
         # If there are only unknown words
         if len(known_tokens) == 0:
@@ -148,7 +150,7 @@ class SIF:
             return self.zero_vector
 
         # create vector
-        ids = [self.token2idx[token] for token in known_tokens]
+        ids = [self.word2index[token] for token in known_tokens]
         embeds = self.embeddings[ids]
         if self.use_sif:
             word_weights = np.array([self.get_sif_weight(token) for token in known_tokens])
@@ -163,13 +165,13 @@ class SIF:
         return sent_vec
 
     def get_sif_weight(self, word: str) -> float:
-        w_prob = self.word_prob[word] if word in self.word_freq else 0
+        w_prob = self.word_prob[word] if word in self.word_prob else 0
         weight = self.a / (self.a + w_prob)
 
         return weight
 
     @staticmethod
-    def create_wordprob_from_wordfreq(file_path: str, min_freq: int = None) -> Dict[str, int]:
+    def create_wordprob_from_wordfreq(file_path: str, min_freq: int = None) -> Dict[str, float]:
         """
         Args:
             file_path: Path to word frequency file (each line contains a word and its frequency).
