@@ -1,11 +1,10 @@
+import MeCab
 import argparse
+import sentencepiece
 import string
 import unicodedata
-from os import path
-
-import MeCab
-import sentencepiece
 from logzero import logger
+from os import path
 
 NEW_LINE_CHAR = "\\n"
 
@@ -22,7 +21,6 @@ def create_parser():
 # 生文の正規化
 def normalize(text: str) -> str:
     # 改行を統一
-    string.whitespace
     for s in ['\n', '\r', '\v', '\f']:
         text = text.replace(s, "\\n")
     # 空白を統一
@@ -34,6 +32,7 @@ def normalize(text: str) -> str:
 
 class Detokenizer:
     """tokenizeしたtextを元に戻す"""
+
     def __init__(self, spm_path: str = None):
         self.spm_path: str = spm_path
         self.spm = None
@@ -80,7 +79,7 @@ class MecabTokenizer:
 
     def _customize_tokenization(self, text: str) -> str:
         """Please customize"""
-        # for line in self.mecab.parse(text).split('\n'):
+        # for line in self.mecab_tagger.parse(text).split('\n'):
         #     if line == 'EOS':
         #         pass
         #     token, rest = line.split('\t')

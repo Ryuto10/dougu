@@ -1,10 +1,9 @@
-from dataclasses import dataclass
-from typing import Dict, List, Tuple
-
 import numpy as np
+from dataclasses import dataclass
 from logzero import logger
 from sklearn.metrics.pairwise import cosine_similarity
 from sklearn.preprocessing import normalize
+from typing import Dict, List, Tuple
 
 from .read import read_line
 
@@ -120,7 +119,7 @@ class SIF:
     """
     embeddings: np.ndarray
     word2index: Dict[str, int]
-    word_freq_file: str = None
+    word_freq_file: str
     normalize_by_word: bool = False
     normalize_by_sent: bool = True
 

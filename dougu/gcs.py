@@ -1,8 +1,7 @@
-from os import path
-
 from google.auth import exceptions
 from google.cloud import storage
 from logzero import logger
+from os import path
 
 
 def upload_to_gcs(project: str, bucket_name: str, blob_name: str, file_name: str) -> None:
