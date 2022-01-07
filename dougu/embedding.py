@@ -1,16 +1,16 @@
-from dataclasses import dataclass
-from typing import Dict, List, Tuple
-
 import numpy as np
+from dataclasses import dataclass
 from logzero import logger
 from sklearn.metrics.pairwise import cosine_similarity
 from sklearn.preprocessing import normalize
+from typing import Dict, List, Tuple
 
 from .read import read_line
 
 
 class WordEmbedding:
     """Measuring the similarity of word embeddings"""
+
     def __init__(self, model_path: str):
         self.model_path = model_path
         self.n_vocab = None
@@ -91,7 +91,7 @@ class WordEmbedding:
         Return:
             best_n: [(word, score), ...], (Length of list = top_n)
         """
-        assert vec.shape == (self.dim, ), f"The dimensions of the vectors don't match ({vec.shape} != {self.dim})."
+        assert vec.shape == (self.dim,), f"The dimensions of the vectors don't match ({vec.shape} != {self.dim})."
         scores = cosine_similarity(vec.reshape(1, -1), self.embeds)[0]
         index2word = {idx: word for word, idx in self.word2index.items()}
         best_n = [(index2word[index], scores[index]) for index in np.argsort(-scores)[1:top_n + 1]]
@@ -118,7 +118,7 @@ class SIF:
     """
     embeddings: np.ndarray
     word2index: Dict[str, int]
-    word_freq_file: str = None
+    word_freq_file: str
     normalize_by_word: bool = False
     normalize_by_sent: bool = True
 

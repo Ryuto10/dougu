@@ -1,8 +1,7 @@
+import torchtext
 from itertools import chain, islice
 from math import ceil
 from typing import Generator, Iterable
-
-import torchtext
 
 
 def batch_gen(iterable: Iterable, batchsize: int) -> Generator[Iterable, None, None]:

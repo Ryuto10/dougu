@@ -7,10 +7,10 @@ from os import getcwd, path
 
 
 def write_log(
-    logfile_path: str = None,
-    args_file_path: str = None,
-    args: Namespace = None,
-    comment: str = None
+        logfile_path: str = None,
+        args_file_path: str = None,
+        args: Namespace = None,
+        comment: str = None
 ):
     """Write log file
 
