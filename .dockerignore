@@ -105,3 +105,14 @@ ENV/
 
 # pytest
 .pytest_cache/
+
+# source
+dougu/
+tests/
+.gitignore
+.docker-compose.yaml
+Docker
+LICENSE
+Makefile
+README.md
+setup.py

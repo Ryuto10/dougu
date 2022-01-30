@@ -1,0 +1,6 @@
+sample:
+  value: 1
+  items:
+    - a
+    - 1.23
+    - c

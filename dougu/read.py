@@ -1,48 +1,51 @@
 import gzip
 import json
-from typing import Generator
+from pathlib import Path
+from typing import Any, Dict, Generator
+
+import yaml
+from logzero import logger
+from tqdm import tqdm
 
 
-def read_line(file_path: str) -> Generator[str, None, None]:
-    """ファイルの行を読み込みます。gzipで圧縮したファイルも読み込みます。
+def read_line(file_path: str, progress: bool = True) -> Generator[str, None, None]:
+    """Read lines from a file
 
     Args:
-        file_path (str): 読み込むfileまでのpath (.gz, .gzip も対応)
+        file_path: Path to a file (.txt, .txt.gzip, .txt.gz)
+        progress:  If true, displays the progress of loading the file
 
     Yields:
-        Generator[str]: 1行ごとに吐き出すジェネレータ関数
+        line: Read line
+
     """
-    fi = gzip.open(file_path, "rt", "utf-8") if is_gzip(file_path) else open(file_path)
+    if not Path(file_path).exists():
+        raise FileNotFoundError(f"'{file_path}' is not found")
 
-    for line in fi:
+    is_gzip = (
+        True if file_path.endswith(".gzip") or file_path.endswith(".gz") else False
+    )
+    fi = (
+        gzip.open(file_path, mode="rt", encoding="utf-8")
+        if is_gzip
+        else open(file_path)
+    )
+    loader = tqdm(fi) if progress else fi
+
+    for line in loader:
         yield line.rstrip("\n")
-
     fi.close()
 
 
-def is_gzip(file_path: str) -> bool:
-    """拡張子でfileがgzipファイルかどうか判定します
-    Args:
-        file_path (str): Path to input file
-
-    Returns:
-        bool: Whether the file is a gzip file or not
-    """
-
-    if file_path.endswith(".gzip") or file_path.endswith(".gz"):
-        return True
-    else:
-        return False
-
-
 def read_jsonl(file_path: str) -> Generator[str, None, None]:
-    """jsonl形式のファイルを読み込みます。gzipで圧縮したファイルも読み込みます。
+    """Read lines from json format file.
 
     Args:
-        file_path (str): 読み込むfileまでのpath (.gz, .gzip も対応)
+        file_path: Path to a file (.jsonl, .jsonl.gzip, .jsonl.gz)
 
     Yields:
-        Generator[str]: 1行ごとに吐き出すジェネレータ関数
+        line: Read line
+
     """
     for line in read_line(file_path):
         if not line:
@@ -51,7 +54,33 @@ def read_jsonl(file_path: str) -> Generator[str, None, None]:
 
 
 def count_file_length(file_path: str) -> int:
-    """Count the number of lines in the file"""
+    """Count the number of lines in the file
+
+    Args:
+        file_path: Path to a file
+
+    """
+    idx = 0
     for idx, _ in enumerate(read_line(file_path), 1):
         pass
     return idx
+
+
+def read_yaml(file_path: str) -> Dict[str, Any]:
+    """Read a yaml format file
+
+    Args:
+        file_path: Path to a yaml file
+
+    Returns:
+        yaml_dict: Loaded yaml file
+
+    """
+    if not Path(file_path).exists():
+        raise FileNotFoundError(f"yaml file is not found: {file_path}")
+
+    logger.debug(f"load: {Path(file_path).absolute()}")
+    yaml_dict = yaml.safe_load(open(file_path))
+    logger.debug("done")
+
+    return yaml_dict
