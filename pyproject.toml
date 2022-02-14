@@ -6,10 +6,6 @@ authors = ["ryuto konno <pxx.rai@gmail.com>"]
 
 [tool.poetry.dependencies]
 python = "3.9.7"
-pytest = "6.2.5"
-black = "21.12b0"
-isort = "5.10.1"
-mypy = "0.931"
 logzero = "1.7.0"
 tqdm = "4.62.3"
 PyYAML = "6.0"
@@ -26,13 +22,16 @@ google-auth = "2.4.0"
 google-cloud-storage = "2.1.0"
 seaborn = "0.11.2"
 matplotlib = "3.5.1"
-ipdb = "0.13.9"
-ipython = "8.0.1"
-types-PyYAML = "6.0.3"
-python-dateutil = "^2.8.2"
-types-python-dateutil = "^2.8.8"
 
 [tool.poetry.dev-dependencies]
+pytest = "^7.0.1"
+black = "^22.1.0"
+isort = "^5.10.1"
+mypy = "^0.931"
+ipdb = "^0.13.9"
+ipython = "^8.0.1"
+python-dateutil = "^2.8.2"
+types-PyYAML = "^6.0.4"
 
 [build-system]
 requires = ["poetry-core>=1.0.0"]
