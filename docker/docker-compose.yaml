@@ -1,0 +1,13 @@
+version: '3'
+services:
+  python-work:
+    platform: linux/amd64
+    build:
+      context: ".."
+      dockerfile: "docker/Dockerfile"
+    volumes:
+      - type: bind
+        source: ".."
+        target: "/work"
+    tty: true
+    working_dir: '/work'
